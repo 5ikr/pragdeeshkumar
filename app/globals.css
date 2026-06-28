@@ -1,26 +1,174 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: "makcasaregular";
+  src:
+    url("../fonts/makcasa-regular-webfont.woff2") format("woff2"),
+    url("../fonts/makcasa-regular-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@font-face {
+  font-family: "minecraftmedium";
+  src:
+    url("../fonts/minecraft-webfont.woff2") format("woff2"),
+    url("../fonts/minecraft-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: "byliner_script_personal_useRg";
+  src:
+    url("../fonts/bylinerscript_personal_use_only-webfont.woff2")
+      format("woff2"),
+    url("../fonts/bylinerscript_personal_use_only-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+*{
+    cursor: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+
+  background-image: url("../app/imgs/marjan-blan-_kUxT8WkoeY-unsplash.jpg");
+
+  /* Keep the image from repeating like a grid */
+  background-repeat: no-repeat;
+
+  /* Center the image on the screen */
+  background-position: center;
+
+  /* Scale the image to cover the entire screen */
+  background-size: cover;
+
+  /* Keep the background fixed during scroll (Optional) */
+  background-attachment: fixed;
+}
+
+.texxt {
+  font-family: "makcasaregular";
+  animation: upAnimation 1s;
+  animation-timing-function: ease;
+  animation-delay: 0s;
+}
+
+.reveal-it {
+  font-family: "minecraftmedium";
+}
+
+.nav-items {
+  font-family: "byliner_script_personal_useRg";
+}
+
+.right-bar {
+  font-family: "minecraftmedium";
+}
+
+.mob-items {
+  transform: translateY(-1000px);
+  background-image: none;
+  background: #444;
+}
+
+.isOpenAnimation {
+  transform: translateY(0px);
+  animation: upAnimation 1s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
+  animation-direction: normal;
+}
+
+.isCloseAnimation {
+  transform: translateY(-1000px);
+  animation: downAnimation 1s;
+  animation-timing-function: ease-in-out;
+  animation-delay: 0s;
+  animation-direction: normal;
+}
+
+.closeBtn {
+  z-index: 1000;
+}
+
+#about {
+  z-index: 100;
+}
+
+@keyframes upAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(-300px);
+    border-bottom-left-radius: 100vh;
+    border-bottom-right-radius: 100vh;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+    border-bottom-left-radius: 0vh;
+    border-bottom-right-radius: 0vh;
+  }
+}
+
+@keyframes downAnimation {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+    border-bottom-left-radius: 0vh;
+    border-bottom-right-radius: 0vh;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-300px);
+    border-bottom-left-radius: 100vh;
+    border-bottom-right-radius: 100vh;
+  }
+}
+
+@keyframes rightOpen {
+  0% {
+    opacity: 1;
+    transform: translateX(10px);
+    border-radius: 0vh;
+    scale: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0px);
+    border-radius: 100vh;
+    scale: 1;
+  }
+}
+
+.custom-shape-divider-top-1782646492 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.custom-shape-divider-top-1782646492 svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 129px;
+}
+
+.custom-shape-divider-top-1782646492 .shape-fill {
+  fill: #000000;
+}
+
+.menu_light {
+  background: #0000004f;
 }
