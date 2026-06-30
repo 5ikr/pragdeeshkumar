@@ -23,6 +23,10 @@ export interface TwistingRibbonProps extends React.HTMLAttributes<HTMLDivElement
   lightColors?: RibbonColors;
   /** Custom colors for dark mode (accepts hex strings like "#1e2024") */
   darkColors?: RibbonColors;
+  /** Whether to play a right-to-left reveal animation on mount (default true) */
+  revealOnMount?: boolean;
+  /** Duration of the reveal animation in ms (default 1600) */
+  revealDuration?: number;
 }
 
 // Helper to convert hex to RGB array
@@ -41,6 +45,8 @@ export function TwistingRibbon({
   twistCycles = 6,
   lightColors,
   darkColors,
+  revealOnMount = true,
+  revealDuration = 1600,
   ...props
 }: TwistingRibbonProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,10 +64,24 @@ export function TwistingRibbon({
     let width = container.clientWidth;
     let height = container.clientHeight;
 
+    // ── Reveal animation state ──────────────────────────────────────────
+    const revealStart = performance.now();
+
+    function easeOutExpo(x: number) {
+      return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    }
+
+    function getRevealProgress(now: number) {
+      if (!revealOnMount) return 1;
+      const elapsed = now - revealStart;
+      const linear = Math.min(elapsed / revealDuration, 1);
+      return easeOutExpo(linear);
+    }
+
     // ── Configuration ───────────────────────────────────────────────────
-    const RIBBON_HALF_W = 14; 
-    const RIBBON_X_SCALE = 1.4; 
-    const RIBBON_X_OFFSET = 0.2; 
+    const RIBBON_HALF_W = 14;
+    const RIBBON_X_SCALE = 1.4;
+    const RIBBON_X_OFFSET = 0.2;
 
     // ── Wave / motion ─────────────────────────────────────────────────────
     const WAVE1_FREQ = 3.5;
@@ -74,7 +94,6 @@ export function TwistingRibbon({
     const TWIST_TIME_SPEED = 0.5;
 
     // ── Color palette ─────────────────────────────────────────────────────
-    // Light Mode Colors (defaults)
     const L_COLOR_FACE = lightColors?.face ? hexToRgb(lightColors.face) : [255, 60, 10];
     const L_COLOR_FOLD_A = lightColors?.foldA ? hexToRgb(lightColors.foldA) : [180, 255, 0];
     const L_COLOR_FOLD_B = lightColors?.foldB ? hexToRgb(lightColors.foldB) : [60, 80, 255];
@@ -84,7 +103,6 @@ export function TwistingRibbon({
     const L_EDGE_COLOR = [0, 0, 0];
     const L_EDGE_ALPHA = 22 / 255;
 
-    // Dark Mode Colors (Restore original vibrant colors for dark mode)
     const D_COLOR_FACE = darkColors?.face ? hexToRgb(darkColors.face) : [255, 60, 10];
     const D_COLOR_FOLD_A = darkColors?.foldA ? hexToRgb(darkColors.foldA) : [180, 255, 0];
     const D_COLOR_FOLD_B = darkColors?.foldB ? hexToRgb(darkColors.foldB) : [60, 80, 255];
@@ -147,14 +165,14 @@ export function TwistingRibbon({
           i === 0
             ? pts[1].x - pts[0].x
             : i === last
-            ? pts[last].x - pts[last - 1].x
-            : pts[i + 1].x - pts[i - 1].x;
+              ? pts[last].x - pts[last - 1].x
+              : pts[i + 1].x - pts[i - 1].x;
         const dy =
           i === 0
             ? pts[1].y - pts[0].y
             : i === last
-            ? pts[last].y - pts[last - 1].y
-            : pts[i + 1].y - pts[i - 1].y;
+              ? pts[last].y - pts[last - 1].y
+              : pts[i + 1].y - pts[i - 1].y;
         const len = Math.sqrt(dx * dx + dy * dy) || 1;
         return { nx: -dy / len, ny: dx / len };
       });
@@ -190,7 +208,7 @@ export function TwistingRibbon({
     function getFoldColor(frac: number, time: number, isDark: boolean) {
       const cycle =
         (((frac * COLOR_CYCLE_FREQ + time * COLOR_CYCLE_SPEED) % 1) + 1) % 1;
-      
+
       const colorA = isDark ? D_COLOR_FOLD_A : L_COLOR_FOLD_A;
       const colorB = isDark ? D_COLOR_FOLD_B : L_COLOR_FOLD_B;
       const colorC = isDark ? D_COLOR_FOLD_C : L_COLOR_FOLD_C;
@@ -288,19 +306,29 @@ export function TwistingRibbon({
       }
     }
 
-    function render() {
+    function render(now: number = performance.now()) {
       ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
       t += waveSpeed;
 
-      // Detect dark mode from the document element
       const isDark = document.documentElement.classList.contains("dark");
+      const reveal = getRevealProgress(now);
 
       const pts = buildSpine(t);
       const normals = buildNormals(pts);
       const { tops, bots, twists } = buildEdges(pts, normals, t);
 
+      ctx!.save();
+      if (reveal < 1) {
+        const revealX = width * (1 - reveal);
+        ctx!.beginPath();
+        ctx!.rect(revealX, 0, width - revealX, height);
+        ctx!.clip();
+      }
+
       drawShadow(tops, bots, isDark);
       drawRibbon(tops, bots, twists, t, isDark);
+
+      ctx!.restore();
 
       animationFrameId = requestAnimationFrame(render);
     }
@@ -311,7 +339,7 @@ export function TwistingRibbon({
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [segments, waveSpeed, waveAmplitude, twistCycles, lightColors, darkColors]);
+  }, [segments, waveSpeed, waveAmplitude, twistCycles, lightColors, darkColors, revealOnMount, revealDuration]);
 
   return (
     <div

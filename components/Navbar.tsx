@@ -14,9 +14,38 @@ const Navbar = () => {
   ];
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [isLight, setIsLight] = useState(false);
 
   const navRef = useRef<HTMLButtonElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openMenu = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setIsClosing(false);
+    setIsMenuOpen(true);
+  };
+
+  const closeMenu = () => {
+    if (!isMenuOpen || isClosing) return;
+    setIsClosing(true);
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsMenuOpen(false);
+      setIsClosing(false);
+      closeTimeoutRef.current = null;
+    }, 1750);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,135 +69,75 @@ const Navbar = () => {
 
   return (
     <div className="fixed w-full h-full z-50 ">
-      {isMenuOpen ? (
-        isLight ? (
-          <button
-            ref={navRef}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="cursor-target closeBtn group fixed top-3 right-3 flex h-16 w-16 items-center justify-center bg-transparent"
-          >
-            <div className="relative flex items-center justify-center w-12 h-12 rotate-45">
-              <span className="absolute h-1 w-8 bg-black/70 transition"></span>
-              <span className="absolute h-8 w-1 bg-black/70 transition"></span>
-            </div>
-          </button>
-        ) : (
-          <button
-            ref={navRef}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="cursor-target closeBtn group fixed top-3 right-3 flex h-16 w-16 items-center justify-center bg-transparent"
-          >
-            <div className="relative flex items-center justify-center w-12 h-12 rotate-45">
-              <span className="absolute h-1 w-8 bg-white/70 transition"></span>
-              <span className="absolute h-8 w-1 bg-white/70 transition"></span>
-            </div>
-          </button>
-        )
-      ) : (
-        <button
-          ref={navRef}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="cursor-target group fixed top-3 right-3 flex h-16 w-16 items-center justify-center bg-transparent"
-        >
-          <div className="relative z-10 flex flex-col gap-1.5 items-center ">
-            <span
-              className={`block h-[2px] w-6 transition group-hover:w-5 ${isLight ? "bg-black/70" : "bg-white/70"}`}
-            ></span>
-            <span
-              className={`block h-[2px] w-8 transition-w-9 group-hover:w-9 ${isLight ? "bg-black/70" : "bg-white/70"}`}
-            ></span>
-          </div>
-        </button>
-      )}
-      {isMenuOpen ? (
-        <div
-          className={`mob-items isOpenAnimation w-full h-full text-[#E1DCC9] bg-[#444] grid grid-cols-2`}
-        >
-          <ul className="w-full pl-60 h-full flex items-center px-12 justify-center flex-col">
-            {items.map((item) => (
-              <motion.li
-                initial={{ opacity: 0, x: 20 }}
-                viewport={{ once: true }}
-                whileInView={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-                className="nav-items text-6xl mb-10"
-                key={item.id}
-              >
-                <a href={item.href} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                  {item.label}
-                </a>
-              </motion.li>
-            ))}
-          </ul>
-          <ul className="right-bar pr-60 w-full h-full flex flex-col items-center justify-center gap-40">
-            <div className="flex items-start justify-between flex-col px-4">
-              <motion.li
-                initial={{ opacity: 0, x: -20 }}
-                viewport={{ once: true }}
-                whileInView={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-              >
-                <a href="#" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                  Projects
-                </a>
-              </motion.li>
-              <motion.li
-                initial={{ opacity: 0, x: -20 }}
-                viewport={{ once: true }}
-                whileInView={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-              >
-                <a href="#" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                  Team
-                </a>
-              </motion.li>
-            </div>
-            <div className="px-4">
-              <motion.li
-                initial={{ opacity: 0, x: -20 }}
-                viewport={{ once: true }}
-                whileInView={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-              >
-                <a href="#" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                  Contact
-                </a>
-              </motion.li>
-            </div>
-          </ul>
+      <button
+        ref={navRef}
+        onClick={isMenuOpen ? closeMenu : openMenu}
+        className="cursor-target group fixed top-3 right-3 flex h-16 w-16 items-center justify-center bg-transparent z-[60]"
+      >
+        <div className="relative flex items-center justify-center w-8 h-8">
+          <motion.span
+            className={`absolute h-[2px] rounded-full ${isLight && !isMenuOpen ? "bg-black/70" : "bg-white/70"
+              }`}
+            animate={{
+              rotate: isMenuOpen ? 45 : 0,
+              y: isMenuOpen ? 0 : -4,
+              width: isMenuOpen ? 32 : 24,
+            }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            style={{ top: "50%", left: "50%", x: "-50%", y: "-50%" }}
+          />
+          <motion.span
+            className={`absolute h-[2px] rounded-full ${isLight && !isMenuOpen ? "bg-black/70" : "bg-white/70"
+              }`}
+            animate={{
+              rotate: isMenuOpen ? -45 : 0,
+              y: isMenuOpen ? 0 : 4,
+              width: isMenuOpen ? 32 : 32,
+            }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            style={{ top: "50%", left: "50%", x: "-50%", y: "-50%" }}
+          />
         </div>
-      ) : (
-        <div
-          className={`mob-items isCloseAnimation w-full h-full text-[#E1DCC9] bg-[#444] grid grid-cols-2`}
-        >
-          <ul className="w-full h-full pl-60 flex items-center px-12 justify-center flex-col">
-            {items.map((item) => (
-              <li className="nav-items text-6xl mb-10" key={item.id}>
-                <a href={item.href}>{item.label}</a>
-              </li>
-            ))}
-          </ul>
-          <ul className="right-bar pr-60 w-full h-full flex flex-col items-center justify-center gap-40">
-            <div className="flex items-start justify-between flex-col px-4">
-              <li>
-                <a href="#">Projects</a>
-              </li>
-              <li>
-                <a href="#">Team</a>
-              </li>
-            </div>
-            <div className="px-4">
-              <li>
-                <a href="#">Contact</a>
-              </li>
-            </div>
-          </ul>
-        </div>
-      )}
+      </button>
+      <AnimatePresence mode="wait">
+        {isMenuOpen && (
+          <motion.div
+            key="menu-overlay"
+            className={`mob-items isOpenAnimation w-full h-full text-[#fff] ${isClosing ? " panels-exiting" : ""}`}
+            initial={false}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 1 }}
+            transition={{ duration: 1.75, ease: "easeInOut" }}
+          >
+            <div className="cont-1 absolute bg-[#E1DCC9] z-10"></div>
+            <div className="cont-2 absolute bg-[#A8A29A] z-20"></div>
+            <div className="cont-3 absolute bg-[#3A3A3A] z-30"></div>
+            <div className="cont-4 absolute bg-[#0A0A0A] z-40"></div>
+            <ul className="w-full h-full flex items-center px-12 justify-center flex-col absolute z-50">
+              {items.map((item, index) => (
+                <motion.li
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={
+                    isClosing
+                      ? { opacity: 0, y: 20 }
+                      : { opacity: 1, x: 0 }
+                  }
+                  transition={{
+                    duration: 0.5,
+                    delay: isClosing ? 0 : 1.5 + index * 0.25,
+                  }}
+                  className="cursor-target nav-items text-8xl mb-10"
+                  key={item.id}
+                >
+                  <a href={item.href} onClick={closeMenu}>
+                    {item.label}
+                  </a>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

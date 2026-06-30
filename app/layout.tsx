@@ -6,6 +6,7 @@ import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
 import About from "@/components/About";
 import  GradualBlur  from "../components/ui/GradualBlur";
+import TargetCursor from "@/components/ui/TargetCursor";
 
 
 
@@ -37,21 +38,21 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Navbar />
         <Hero />
         <About />
 
-        <GradualBlur
-          target="page"
-          position="bottom"
-          height="7rem"
-          strength={2}
-          divCount={5}
-          curve="bezier"
-          exponential
-          opacity={1}
+        <TargetCursor
+          spinDuration={2}
+          hideDefaultCursor
+          parallaxOn
+          hoverDuration={0.2}
+          cursorColor="#ffffff"
+          cursorColorOnTarget="#B497CF"
         />
+
+       
       </body>
     </html>
   );
